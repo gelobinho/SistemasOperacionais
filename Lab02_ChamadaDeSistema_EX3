@@ -1,0 +1,65 @@
+#include <fcntl.h>  // Inclui as definições para open e suas flags
+#include <stdio.h>  // Inclui as definições para printf
+#include <unistd.h> // Inclui as definições para read, write e close
+
+#define BUFFER_SIZE 128
+
+int main() {
+  // Passo 1: Abrir o arquivo de origem em modo leitura
+  int fdOrigem = open("lab2_ex3_origem.txt", O_RDONLY);
+  if (fdOrigem == -1) {
+    perror("Erro ao abrir o arquivo de origem");
+    return 1; // Encerrar o programa com código de erro
+  }
+
+  // Passo 2: Abrir ou criar o arquivo de destino em modo escrita
+  int fdDestino =
+      open("lab2_ex3_destino.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (fdDestino == -1) {
+    perror("Erro ao abrir/criar o arquivo de destino");
+    close(fdOrigem); // Fechar o arquivo de origem antes de sair
+    return 1;        // Encerrar o programa com código de erro
+  }
+
+  // Buffer para armazenar o conteúdo lido
+  char buffer[BUFFER_SIZE];
+  ssize_t bytesLidos, bytesEscritos;
+
+  // Passo 3: Ler do arquivo de origem e escrever no arquivo de destino
+  while ((bytesLidos = read(fdOrigem, buffer, sizeof(buffer))) > 0) {
+    bytesEscritos = write(fdDestino, buffer, bytesLidos);
+    if (bytesEscritos != bytesLidos) {
+      // Verificar se todos os bytes foram escritos
+      perror("Erro ao escrever no arquivo de destino");
+      close(fdOrigem); // Fechar arquivos antes de sair
+      close(fdDestino);
+      return 1; // Encerrar o programa com código de erro
+    }
+
+    else {
+      printf("Arquivo transcrito com sucesso!\n");
+    }
+  }
+
+  if (bytesLidos == -1) {
+    // Erro ao ler o arquivo de origem
+    perror("Erro ao ler o arquivo de origem");
+    close(fdOrigem); // Fechar arquivos antes de sair
+    close(fdDestino);
+    return 1; // Encerrar o programa com código de erro
+  }
+
+  // Passo 4: Fechar ambos os arquivos após a operação
+  if (close(fdOrigem) == -1) {
+    perror("Erro ao fechar o arquivo de origem");
+    close(fdDestino); // Fechar o arquivo de destino antes de sair
+    return 1;         // Encerrar o programa com código de erro
+  }
+
+  if (close(fdDestino) == -1) {
+    perror("Erro ao fechar o arquivo de destino");
+    return 1; // Encerrar o programa com código de erro
+  }
+
+  return 0; // Encerrar o programa com sucesso
+}
