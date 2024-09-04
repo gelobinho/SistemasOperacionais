@@ -1,4 +1,4 @@
-/*#include <fcntl.h>   // Inclui as definições para open e suas flags
+#include <fcntl.h>   // Inclui as definições para open e suas flags
 #include <stdio.h>   // Inclui as definições para printf
 #include <unistd.h>  // Inclui as definições para read, write e close
 
