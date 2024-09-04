@@ -1,0 +1,61 @@
+/*#include <fcntl.h>   // Inclui as definições para open e suas flags
+#include <stdio.h>   // Inclui as definições para printf
+#include <unistd.h>  // Inclui as definições para read e close
+
+#define BUFFER_SIZE 128
+
+int main() {
+    // Passo 1: Abrir o arquivo em modo leitura
+    int fd = open("lab2_ex2.txt", O_RDONLY);
+    if (fd == -1) {
+        // Verificar se o arquivo foi aberto com sucesso
+        perror("Erro ao abrir o arquivo");
+        return 1; // Encerrar o programa com código de erro
+    }
+
+    // Buffer para armazenar o conteúdo lido
+    char buffer[BUFFER_SIZE];
+    ssize_t bytesLidos;
+    int linhaCount = 0;
+
+    // Passo 2: Ler o arquivo e contar linhas
+    while ((bytesLidos = read(fd, buffer, sizeof(buffer))) > 0) {
+        // Contar número de quebras de linha no buffer lido
+        for (ssize_t i = 0; i < bytesLidos; i++) {
+            if (buffer[i] == '\n') {
+                linhaCount++;
+            }
+        }
+    }
+
+    if (bytesLidos == -1) {
+        // Erro ao ler o arquivo
+        perror("Erro ao ler o arquivo");
+        close(fd); // Fechar o arquivo antes de sair
+        return 1; // Encerrar o programa com código de erro
+    }
+
+    // Contar a última linha se o arquivo não termina com uma nova linha
+    // Se o arquivo não termina com \n, a última linha não será contada no loop
+    if (bytesLidos > 0 && buffer[bytesLidos - 1] != '\n') {
+        linhaCount++;
+    }
+
+    // Passo 3: Exibir o número total de linhas
+    printf("Número total de linhas: %d\n", linhaCount+1);
+
+    // Fechar o arquivo após a leitura
+    if (close(fd) == -1) {
+        // Erro ao fechar o arquivo
+        perror("Erro ao fechar o arquivo");
+        return 1; // Encerrar o programa com código de erro
+    }
+
+    return 0; // Encerrar o programa com sucesso
+}*/
+
+
+
+
+
+
