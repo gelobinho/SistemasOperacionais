@@ -1,0 +1,44 @@
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h> // fork(), exec() 
+#include <sys/types.h> // tipos de dados como pid_t
+#include <sys/wait.h> // wait()
+
+
+int main() {
+    pid_t pid;
+
+    // Criação do processo filho
+    pid = fork();
+
+    if (pid < 0) {
+        // Se fork() falharS
+        perror("fork");
+        return 1;
+    }
+
+    if (pid == 0) {
+        // Processo filho
+        printf("Processo filho PID: %d\n", getpid()); 
+        
+        for (int i = 0; i < 5; i++) {
+            printf("Loop filho: n°%d\n", i + 1);
+            sleep(1);  // 1 segundo
+        }
+
+        exit(0);  // Encerra o processo filho
+    }
+    
+    else {
+        // Código executado pelo processo pai
+        printf("Processo pai PID: %d\n", getpid());
+        printf("PID do filho: %d\n", pid);
+
+        // Espera o processo filho terminar
+        wait(NULL);
+    }
+
+    return 0;
+}
