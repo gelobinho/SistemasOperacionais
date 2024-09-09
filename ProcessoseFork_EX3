@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h> // fork(), exec() 
+#include <sys/types.h> // tipos de dados como pid_t
+#include <sys/wait.h> // wait()
+
+int main() {
+    pid_t pid;
+
+    // Criação do processo filho
+    pid = fork();
+
+    if (pid < 0) {
+        // Se fork() falhar
+        perror("fork");
+        return 1;
+    }
+
+    if (pid == 0) {
+        // Processo filho
+        printf("Processo filho PID: %d\n", getpid()); 
+        
+        // Executa o comando 'ls' usando execlp()
+        execlp("ls", "ls", NULL);
+
+        // Caso o exec falhe
+        perror("exec");
+        exit(1);  // Encerra o processo filho com erro
+    } else {
+        // Código executado pelo processo pai
+        printf("Processo pai PID: %d\n", getpid());
+        printf("PID do filho: %d\n", pid);
+
+        // Processo pai espera o filho terminar
+        wait(NULL);
+
+        printf("Processo filho terminou.\n");
+    }
+
+    return 0;
+}
