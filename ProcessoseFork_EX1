@@ -36,8 +36,7 @@ int main() {
         printf("Processo pai PID: %d\n", getpid());
         printf("PID do filho: %d\n", pid);
 
-        // Espera o processo filho terminar
-        wait(NULL);
+
     }
 
     return 0;
