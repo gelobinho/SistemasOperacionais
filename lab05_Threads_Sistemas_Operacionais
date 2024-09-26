@@ -1,0 +1,37 @@
+import threading
+import random
+
+def maior(array, inicio, fim, max, i):
+    maior_num = array[inicio]
+    for j in range(inicio + 1, fim):
+        if array[j] > maior_num:
+            maior_num = array[j]
+    max[i] = maior_num
+
+array = [10]
+for l in range(10):
+    num = random.randint(1,500)
+    array.append(num)
+
+tam = len(array)
+max = [0, 0]
+
+meio = tam // 2
+
+thread_1 = threading.Thread(target=maior, args=(array, 0, meio, max, 0))
+thread_2 = threading.Thread(target=maior, args=(array, meio, tam, max, 1))
+
+thread_1.start()
+thread_2.start()
+
+thread_1.join()
+thread_2.join()
+
+print("Vetor:",array)
+print("Vetor com os valores encontrados pelas threads:",max)
+
+if max[0] > max[1]:
+    print("Maior valor do vetor:",max[0])
+
+else:
+    print("Maior valor do vetor:",max[1])
