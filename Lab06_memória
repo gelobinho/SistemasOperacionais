@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node {
+    int data;
+    struct node *next;
+}; 
+typedef struct node node_t;
+
+// Função para criar uma nova célula
+node_t* criar_node(int valor) {
+    node_t *novo_node = (node_t*)malloc(sizeof(node_t));
+    if (novo_node == NULL) {
+        perror("Erro ao alocar memória");
+        exit(EXIT_FAILURE);
+    }
+    novo_node->data = valor;
+    novo_node->next = NULL;
+    return novo_node;
+}
+
+// Função para exibir os valores da lista encadeada
+void exibir_lista(node_t *inicio) {
+    node_t *atual = inicio;
+    printf("Elementos da lista: ");
+    while (atual != NULL) {
+        printf("%d -> ", atual->data);
+        atual = atual->next;
+    }
+    printf("NULL\n");
+}
+
+// Função para desalocar a memória da lista
+void liberar_lista(node_t **inicio) {
+    node_t *atual = *inicio;
+    node_t *prox_node;
+    while (atual != NULL) {
+        prox_node = atual->next;
+        free(atual);
+        atual = prox_node;
+    }
+    *inicio = NULL;
+}
+
+int main() {
+    // Inicialização da lista encadeada com três nós
+    node_t *inicio = criar_node(10);
+    inicio->next = criar_node(25);
+    inicio->next->next = criar_node(35);
+
+    // Exibição dos valores contidos na lista
+    exibir_lista(inicio);
+
+    // Cálculo do espaço de memória ocupado por cada nó
+    printf("Memória utilizada por cada nó: %lu bytes\n", sizeof(node_t));
+
+    // Remover a lista e liberar a memória
+    liberar_lista(&inicio);
+    printf("Lista foi removida e a memória foi liberada.\n");
+
+    // Cálculo do número máximo de elementos em 1 GB de memória
+    long long memoria_total = 1073741824; // 1 GB em bytes
+    long long tamanho_node = sizeof(node_t);
+    long long max_nos = memoria_total / tamanho_node;
+    printf("Número máximo de nós na lista com 1 GB de memória: %lld\n", max_nos);
+
+    return 0;
+}
