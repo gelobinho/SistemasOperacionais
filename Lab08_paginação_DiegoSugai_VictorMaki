@@ -1,0 +1,106 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define TAM_FRAME 4096     // 4KB (tamanho de cada página/frame)
+#define NUM_FRAMES 8       // Número de frames na memória física
+#define NUM_PAGINAS 16     // Número de páginas na memória virtual
+
+// Estrutura que representa uma entrada na tabela de páginas
+typedef struct {
+    int pagina_id;        // ID da página virtual
+    int frame_id;         // ID do frame físico correspondente
+    bool valido;          // Indica se o mapeamento é válido
+} EntradaTabelaPagina;
+
+// Estrutura para gerenciar a tabela de páginas de um processo
+typedef struct {
+    int processo_id;                      // ID do processo
+    EntradaTabelaPagina *entradas;        // Array de entradas da tabela de páginas
+    int num_paginas;                      // Número de páginas mapeadas para esse processo
+} TabelaPagina;
+
+// Estrutura que representa um processo com endereços virtuais para acessar
+typedef struct {
+    int pid;                // ID do processo
+    int *enderecos;         // Array com endereços virtuais a serem acessados
+    int num_enderecos;      // Quantidade de endereços a serem acessados
+    int tamanho_processo;   // Tamanho total do processo em bytes
+} Processo;
+
+// Função para inicializar a tabela de páginas de um processo
+TabelaPagina* inicializar_tabela_paginas(int processo_id, int num_paginas) {
+    TabelaPagina *tabela = malloc(sizeof(TabelaPagina));
+    tabela->processo_id = processo_id;
+    tabela->num_paginas = num_paginas;
+    tabela->entradas = malloc(num_paginas * sizeof(EntradaTabelaPagina));
+
+    for (int i = 0; i < num_paginas; i++) {
+        tabela->entradas[i].pagina_id = i;
+        tabela->entradas[i].frame_id = -1; // Inicia como inválido
+        tabela->entradas[i].valido = false;
+    }
+    return tabela;
+}
+
+// Função para alocar uma página para um frame
+int alocar_pagina_para_frame(TabelaPagina *tabela, int pagina_id, int frame_id) {
+    if (pagina_id >= tabela->num_paginas) {
+        printf("Erro: Número de página inválido.\n");
+        return -1;
+    }
+
+    tabela->entradas[pagina_id].frame_id = frame_id;
+    tabela->entradas[pagina_id].valido = true;
+
+    return frame_id;
+}
+
+// Função para traduzir um endereço virtual em um endereço físico
+int traduzir_endereco_virtual(TabelaPagina *tabela, int endereco_virtual) {
+    int num_pagina = endereco_virtual / TAM_FRAME;       // Extrair o número da página
+    int offset = endereco_virtual % TAM_FRAME;           // Extrair o offset
+
+    if (num_pagina >= tabela->num_paginas || !tabela->entradas[num_pagina].valido) {
+        printf("Erro: Falta de página ou página inválida!\n");
+        return -1;
+    }
+
+    int frame_id = tabela->entradas[num_pagina].frame_id;
+    int endereco_fisico = (frame_id * TAM_FRAME) + offset; // Concatenar o frame e o offset
+
+    return endereco_fisico;
+}
+
+// Função principal de teste
+int main() {
+    // Inicializar tabela de páginas para o processo 1
+    TabelaPagina *tabela_processo1 = inicializar_tabela_paginas(1, NUM_PAGINAS);
+
+    // Definir endereços virtuais que o processo 1 irá acessar
+    int enderecos_processo1[] = {0, 5000, 8192, 12288, 16384};
+    Processo processo1 = {1, enderecos_processo1, 5, 20000};  // Processo com 5 endereços e tamanho de 20KB
+
+    // Alocar páginas para frames na tabela de páginas do processo 1
+    alocar_pagina_para_frame(tabela_processo1, 0, 2);  // Página 0 -> Frame 2
+    alocar_pagina_para_frame(tabela_processo1, 1, 5);  // Página 1 -> Frame 5
+    alocar_pagina_para_frame(tabela_processo1, 2, 1);  // Página 2 -> Frame 1
+    alocar_pagina_para_frame(tabela_processo1, 3, 6);  // Página 3 -> Frame 6
+
+    // Traduzir endereços virtuais para físicos e imprimir os resultados
+    printf("Tradução de endereços virtuais para processo %d:\n", processo1.pid);
+    for (int i = 0; i < processo1.num_enderecos; i++) {
+        int endereco_virtual = processo1.enderecos[i];
+        int endereco_fisico = traduzir_endereco_virtual(tabela_processo1, endereco_virtual);
+        
+        if (endereco_fisico != -1) {
+            printf("Endereço virtual %d -> Endereço físico %d\n", endereco_virtual, endereco_fisico);
+        }
+    }
+
+    // Liberar memória
+    free(tabela_processo1->entradas);
+    free(tabela_processo1);
+
+    return 0;
+}
